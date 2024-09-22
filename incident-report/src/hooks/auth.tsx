@@ -38,10 +38,6 @@ function AuthProvider({ children }: IAuthProviderProps) {
         'Authorization'
       ] = `Bearer ${response?.data?.access_token}`;
 
-      console.log("--->");
-      console.log(response.data)
-      console.log("--->");
-
       setUser(response?.data);
     } catch (error) {
       const message = error?.response?.data?.error;
