@@ -6,6 +6,7 @@ import { useTheme } from 'styled-components/native';
 import DangerCircle from "@assets/icons/bold/Danger Circle.svg";
 
 import * as S from './styles';
+import { useNavigation } from '@react-navigation/native';
 
 const severityColor = {
   "1": "#28a745",
@@ -29,9 +30,10 @@ interface ITicketComponentProps {
 
 export function TicketComponent({ item }: ITicketComponentProps) {
   const theme = useTheme();
+  const { navigate } = useNavigation();
 
   return (
-    <S.Container>
+    <S.Container onPress={() => navigate("ShowIncident", { item })}>
       <HStack
         spacing={12}
         justifyContent="space-between"

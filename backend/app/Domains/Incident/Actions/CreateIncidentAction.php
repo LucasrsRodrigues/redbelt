@@ -19,16 +19,17 @@ class CreateIncidentAction
 
     public function execute(array $data)
     {
+
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
-            'evidence' => 'required|image',
+            'evidence' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'severity' => 'required|integer|min:1|max:5', // Exemplo de criticidade de 1 a 5
             'host' => 'required|string|max:255',
         ]);
 
 
         if ($validator->fails()) {
-            throw new \InvalidArgumentException('Invalid credentials provided.');
+            throw new \InvalidArgumentException('Invalid data provided.');
         }
 
         $evidencePath = $this->fileUploadService->upload($data['evidence']);

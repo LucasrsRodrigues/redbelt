@@ -13,26 +13,36 @@ import * as Yup from "yup";
 import { UploadEvidence } from './components/UploadEvidence';
 import { Platform } from 'react-native';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const schema = Yup.object().shape({
   name: Yup.string().required(),
   host: Yup.string().url().required()
 });
 
-export function RegisterIncident() {
+export function ShowIncident() {
   const theme = useTheme();
   const { goBack } = useNavigation();
+  const { params } = useRoute();
+  const item = params?.item;
 
   const [selected, setSelected] = useState("");
   const [evidence, setEvidence] = useState("");
 
+  const [editable, setEditable] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
+
   } = useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    defaultValues: {
+      host: item?.host,
+      name: item?.name
+    }
   });
 
   const data = [
@@ -101,6 +111,30 @@ export function RegisterIncident() {
     }
   }
 
+  async function deleteIncident() {
+    try {
+      setLoading(true);
+      await IncidentHTTPService.delete(item?.id);
+
+      Toast.show({
+        type: 'success',
+        text1: "Ocorrência cancelada com sucesso!",
+      });
+
+      goBack();
+
+    } catch (error) {
+      const message = error?.response?.data?.error;
+
+      Toast.show({
+        type: 'error',
+        text1: message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <Box
       flex={1}
@@ -114,7 +148,7 @@ export function RegisterIncident() {
         paddingX={20}
       >
         <Heading>
-          Novo Incidente
+          #{item?.id} {item?.name}
         </Heading>
       </HStack>
 
@@ -125,6 +159,7 @@ export function RegisterIncident() {
       >
         <UploadEvidence
           onChange={setEvidence}
+          defaultImage={`http://127.0.0.1:8000/storage/${item?.evidence}`}
         />
 
         <ControlledInput
@@ -133,12 +168,15 @@ export function RegisterIncident() {
           label='Titulo'
           placeholder='Titulo da evidencia'
           error={errors?.name?.message}
+          editable={false}
         />
 
         <Select
           label="Criticidade"
           data={data}
           setSelected={setSelected}
+          defaultOption={data?.filter(item => item.key === item?.severity)[0]}
+
         />
 
         <ControlledInput
@@ -147,13 +185,23 @@ export function RegisterIncident() {
           label='Host'
           placeholder='ex: https://www.host.com'
           error={errors?.host?.message}
+          editable={false}
         />
+        {editable ? (
+          <Button
+            label='Registrar'
+            onPress={handleSubmit(submit)}
+            isLoading={isSubmitting}
+          />
+        ) : (
+          <Button
+            label='Cancelar ocorrência'
+            onPress={deleteIncident}
+            isLoading={loading}
+            backgroundColor={theme?.colors?.error}
+          />
+        )}
 
-        <Button
-          label='Registrar'
-          onPress={handleSubmit(submit)}
-          isLoading={isSubmitting}
-        />
       </VStack>
     </Box>
   );

@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components/native";
 import { DefaultTheme } from "styled-components/native/dist/types";
+import { border, color, flexbox, layout, position, space } from "styled-system";
 
 const variantsSize = (theme: DefaultTheme, variant = "medium") => ({
   "small": css`
@@ -40,8 +41,6 @@ export default interface IRNButtonProps {
 }
 
 export const Button = styled.TouchableOpacity<IRNButtonProps>`
-  /* width: 100%; */
-  /* flex: 1; */
   align-items: center;
   justify-content: center;
 
@@ -49,4 +48,11 @@ export const Button = styled.TouchableOpacity<IRNButtonProps>`
   ${({ theme, color, disabled }) => colorVariant(theme, disabled ? "gray" : color)};
   ${({ theme, type }) => typeVariant(theme, type)};
 
+  ${border}
+  ${color}
+  ${flexbox}
+  ${layout}
+  ${position}
+  ${space}
 `;
+

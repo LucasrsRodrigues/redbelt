@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useTheme } from 'styled-components';
-import { SelectList } from 'react-native-dropdown-select-list';
+import { SelectList, SelectListProps } from 'react-native-dropdown-select-list';
 import { VStack } from '@components/base/VStack';
 
 import SearchIcon from "@assets/icons/outline/Search 2.svg";
@@ -10,13 +10,13 @@ import CloseIcon from "@assets/icons/outline/Close.svg";
 import { Text } from '@components/base/Typography/Text';
 
 
-interface ISelectProps {
+interface ISelectProps extends SelectListProps {
   data: {}[];
   setSelected: Function;
   label: string;
 }
 
-export function Select({ data, label, setSelected }: ISelectProps) {
+export function Select({ data, label, setSelected, ...rest }: ISelectProps) {
   const theme = useTheme();
 
   return (
@@ -47,6 +47,7 @@ export function Select({ data, label, setSelected }: ISelectProps) {
         arrowicon={<DownIcon fill={theme?.colors?.placeholder} />}
         closeicon={<CloseIcon fill={theme?.colors?.placeholder} />}
         placeholder='Selecione'
+        {...rest}
       />
     </VStack>
   );

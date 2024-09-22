@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable } from 'react-native';
 
 import { useTheme } from 'styled-components/native';
@@ -13,7 +13,7 @@ import { TicketComponent } from '@components/TicketComponent';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { useAuth } from '@hooks/auth';
 import { IconButton } from '@components/base/Buttons/IconButton';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ShimmerTicketComponent } from '@components/shimmer/TicketComponent';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -55,7 +55,7 @@ export function Dashboard() {
   const [tickets, setTickets] = useState<Array<ITicketsProps>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     (async () => {
       try {
         setIsLoading(true);
@@ -68,7 +68,7 @@ export function Dashboard() {
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, []));
 
 
   return (
@@ -77,7 +77,6 @@ export function Dashboard() {
       backgroundColor={theme?.colors?.background}
       paddingY={70}
     >
-
       <HStack
         justifyContent="center"
         borderBottomColor={theme?.colors?.placeholder}

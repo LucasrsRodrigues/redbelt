@@ -5,13 +5,9 @@ import { useTheme } from 'styled-components/native';
 
 import { Text } from '@components/base/Typography/Text';
 
-import IRNButtonProps, * as S from './styles';
+import * as S from './styles';
+import { IButtonProps } from './button';
 
-interface IButtonProps extends TouchableOpacityProps, IRNButtonProps {
-  label: string;
-  tintColor?: string;
-  isLoading?: boolean;
-}
 
 export function Button({
   label,

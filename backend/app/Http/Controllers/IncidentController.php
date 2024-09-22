@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domains\Incident\Actions\CreateIncidentAction;
+use App\Domains\Incident\Actions\DeleteIncidentAction;
 use App\Domains\Incident\Actions\ListIncidentAction;
 use App\Domains\Incident\Actions\UpdateIncidentAction;
 use Illuminate\Http\Request;
@@ -12,15 +13,18 @@ class IncidentController extends Controller
     protected $createIncidentAction;
     protected $listIncidentAction;
     protected $updateIncidentAction;
+    protected $deleteIncidentAction;
 
     public function __construct(
         CreateIncidentAction $createIncidentAction,
         ListIncidentAction $listIncidentAction,
         UpdateIncidentAction $updateIncidentAction,
+        DeleteIncidentAction $deleteIncidentAction,
     ) {
         $this->createIncidentAction = $createIncidentAction;
         $this->listIncidentAction = $listIncidentAction;
         $this->updateIncidentAction = $updateIncidentAction;
+        $this->deleteIncidentAction = $deleteIncidentAction;
     }
 
     public function index()
@@ -62,8 +66,14 @@ class IncidentController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy()
+    public function destroy($id)
     {
-        return response()->json(['success' => true]);
+        try {
+            $this->deleteIncidentAction->execute($id);
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()]);
+        }
     }
 }
