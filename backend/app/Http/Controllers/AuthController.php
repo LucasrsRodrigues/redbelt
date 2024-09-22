@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domains\User\Actions\LoginUserAction;
 use App\Domains\User\Actions\RegisterUserAction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 class AuthController extends Controller
 {
@@ -13,6 +14,7 @@ class AuthController extends Controller
 
     public function __construct(RegisterUserAction $registerUserAction, LoginUserAction $loginUserAction)
     {
+
         $this->registerUserAction = $registerUserAction;
         $this->loginUserAction = $loginUserAction;
     }
@@ -47,6 +49,17 @@ class AuthController extends Controller
         } catch (\InvalidArgumentException $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    public function refresh()
+    {
+        return $this->respondWithToken(FacadesAuth::refresh());
+    }
+
+    public function logout()
+    {
+        FacadesAuth::logout();
+        return response()->json(['message' => 'Successfuly logged out']);
     }
 
     protected function respondWithToken($token)

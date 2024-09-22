@@ -8,6 +8,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['jwt.auth'])->group(function () {
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
     Route::get('/incidents', [IncidentController::class, 'index']);
     Route::post('/incidents', [IncidentController::class, 'store']);
     Route::get('/incidents/{id}', [IncidentController::class, 'show']);
