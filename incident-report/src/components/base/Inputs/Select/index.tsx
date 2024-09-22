@@ -47,6 +47,7 @@ export function Select({ data, label, setSelected, ...rest }: ISelectProps) {
         arrowicon={<DownIcon fill={theme?.colors?.placeholder} />}
         closeicon={<CloseIcon fill={theme?.colors?.placeholder} />}
         placeholder='Selecione'
+
         {...rest}
       />
     </VStack>

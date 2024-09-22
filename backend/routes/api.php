@@ -14,6 +14,6 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('/incidents', [IncidentController::class, 'index']);
     Route::post('/incidents', [IncidentController::class, 'store']);
     Route::get('/incidents/{id}', [IncidentController::class, 'show']);
-    Route::put('/incidents/{id}', [IncidentController::class, 'update']);
+    Route::post('/incidents/{id}', [IncidentController::class, 'update']);
     Route::delete('/incidents/{id}', [IncidentController::class, 'destroy']);
 });

@@ -13,12 +13,12 @@ class ListIncidentAction
         $this->incidentRepository = $incidentRepository;
     }
 
-    public function execute()
+    public function execute($id = null)
     {
 
-        // if ($id) {
-        //     return $this->incidentRepository->findById($id);
-        // }
+        if ($id) {
+            return $this->incidentRepository->findById($id);
+        }
 
 
         return $this->incidentRepository->getAll();

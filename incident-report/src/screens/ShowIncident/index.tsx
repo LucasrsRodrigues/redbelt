@@ -1,19 +1,27 @@
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useTheme } from 'styled-components/native';
+import { Platform, Pressable } from 'react-native';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+
+import Toast from 'react-native-toast-message';
+
 import { Box, Button, Heading, HStack, Text, VStack } from '@components/base';
 import { Select } from '@components/base/Inputs/Select';
 import { ControlledInput } from '@components/ControlledInput';
+
 import { yupResolver } from '@hookform/resolvers/yup';
+
 import IncidentHTTPService from '@services/infrastructure/service/IncidentHTTPService';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import Toast from 'react-native-toast-message';
-import { useTheme } from 'styled-components/native';
-import * as Yup from "yup";
 
 import { UploadEvidence } from './components/UploadEvidence';
-import { Platform } from 'react-native';
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { useNavigation, useRoute } from '@react-navigation/native';
+
+import GobackIcon from "@assets/icons/bold/Left 2.svg";
+import EditIcon from "@assets/icons/bold/Edit 2.svg"
+
+import * as Yup from "yup";
 
 const schema = Yup.object().shape({
   name: Yup.string().required(),
@@ -26,8 +34,8 @@ export function ShowIncident() {
   const { params } = useRoute();
   const item = params?.item;
 
-  const [selected, setSelected] = useState("");
-  const [evidence, setEvidence] = useState("");
+  const [selected, setSelected] = useState(item?.severity);
+  const [evidence, setEvidence] = useState(item?.evidence);
 
   const [editable, setEditable] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,25 +73,26 @@ export function ShowIncident() {
 
       const dataSend = new FormData();
 
+      if (item?.evidence !== evidence) {
+        const evidenceManipulate = await manipulateAsync(
+          evidence,
+          [{ resize: { width: 800 } }],
+          { compress: 1, format: SaveFormat.JPEG },
+        );
 
-      const evidenceManipulate = await manipulateAsync(
-        evidence,
-        [{ resize: { width: 800 } }],
-        { compress: 1, format: SaveFormat.JPEG },
-      );
+        dataSend.append("evidence", {
+          uri: evidenceManipulate.uri,
+          type: "image/jpg",
+          name: "evidence.jpg"
+        });
+      }
 
       dataSend.append("name", data?.name);
-
-      dataSend.append("evidence", {
-        uri: evidenceManipulate.uri,
-        type: "image/jpg",
-        name: "evidence.jpg"
-      });
 
       dataSend.append("severity", selected);
       dataSend.append("host", data?.host);
 
-      const response = await IncidentHTTPService.create(dataSend);
+      const response = await IncidentHTTPService.update(item?.id, dataSend);
 
       if (response?.data?.error) {
         Toast.show({
@@ -102,6 +111,8 @@ export function ShowIncident() {
       goBack();
 
     } catch (error) {
+      console.log(error)
+      console.log(error?.response?.data?.message)
       const message = error?.response?.data?.error;
 
       Toast.show({
@@ -142,14 +153,23 @@ export function ShowIncident() {
       paddingY={70}
     >
       <HStack
-        justifyContent="center"
+        justifyContent="space-between"
+        alignItems="center"
         borderBottomColor={theme?.colors?.placeholder}
         borderBottomWidth={1}
         paddingX={20}
       >
+        <Pressable onPress={goBack}>
+          <GobackIcon fill={theme?.colors?.white} />
+        </Pressable>
+
         <Heading>
           #{item?.id} {item?.name}
         </Heading>
+
+        <Pressable onPress={() => setEditable(prev => !prev)}>
+          <EditIcon fill={editable ? theme?.colors?.primary : theme?.colors?.white} />
+        </Pressable>
       </HStack>
 
       <VStack
@@ -168,14 +188,14 @@ export function ShowIncident() {
           label='Titulo'
           placeholder='Titulo da evidencia'
           error={errors?.name?.message}
-          editable={false}
+          editable={editable}
         />
 
         <Select
           label="Criticidade"
           data={data}
           setSelected={setSelected}
-          defaultOption={data?.filter(item => item.key === item?.severity)[0]}
+          defaultOption={data?.filter(fitem => fitem.key === item?.severity)[0]}
 
         />
 
@@ -185,11 +205,12 @@ export function ShowIncident() {
           label='Host'
           placeholder='ex: https://www.host.com'
           error={errors?.host?.message}
-          editable={false}
+          editable={editable}
         />
+
         {editable ? (
           <Button
-            label='Registrar'
+            label='Alterar'
             onPress={handleSubmit(submit)}
             isLoading={isSubmitting}
           />

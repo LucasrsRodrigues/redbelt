@@ -4,12 +4,14 @@ import api from "../http/api";
 interface IListDTO { }
 interface IShowDTO { }
 interface ICreateDTO { }
+interface IUpdateDTO { }
 
 interface IIncidentHTTPService {
   list: () => Promise<AxiosResponse>;
   show: (data: IShowDTO) => Promise<AxiosResponse>;
   create: (data: ICreateDTO) => Promise<AxiosResponse>;
   delete: (id: string) => Promise<AxiosResponse>;
+  update: (id: string, data: IUpdateDTO) => Promise<AxiosResponse>;
 }
 
 const IncidentHTTPService: IIncidentHTTPService = {
@@ -29,6 +31,13 @@ const IncidentHTTPService: IIncidentHTTPService = {
   },
   delete: function (id: string): Promise<AxiosResponse> {
     return api.delete(`/incidents/${id}`);
+  },
+  update: function (id: string, data: IUpdateDTO): Promise<AxiosResponse> {
+    return api.post(`/incidents/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 }
 

@@ -58,6 +58,7 @@ export function Dashboard() {
   useFocusEffect(useCallback(() => {
     (async () => {
       try {
+        setTickets([]);
         setIsLoading(true);
 
         const response = await IncidentHTTPService.list();
@@ -69,7 +70,6 @@ export function Dashboard() {
       }
     })();
   }, []));
-
 
   return (
     <Box
@@ -123,8 +123,8 @@ export function Dashboard() {
           <Box height={10} />
         )}
         ListEmptyComponent={isLoading ? <ShimmerTicketComponent /> : <TicketIsEmpty />}
-      />
 
+      />
 
       <IconButton
         onPress={() => navigate("RegisterIncident")}

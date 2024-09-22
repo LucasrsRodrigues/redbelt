@@ -6,7 +6,9 @@ use App\Domains\Incident\Actions\CreateIncidentAction;
 use App\Domains\Incident\Actions\DeleteIncidentAction;
 use App\Domains\Incident\Actions\ListIncidentAction;
 use App\Domains\Incident\Actions\UpdateIncidentAction;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class IncidentController extends Controller
 {
@@ -61,9 +63,30 @@ class IncidentController extends Controller
         }
     }
 
-    public function update()
+    public function update(Request $request, $id)
     {
-        return response()->json(['success' => true]);
+
+        $data = $request->all();
+
+        try {
+            $incidentExists = $this->show($id);
+            $incidentExists = $incidentExists->getData();
+
+            if (count(get_object_vars($incidentExists)) === 0) {
+                return response()->json(['message' => "Incidente não encontrado."], 404);
+            }
+
+            $newData = (array) $this->updateObject($incidentExists, $data);
+
+            // Gravar novo incidente;
+            $incident = $this->updateIncidentAction->execute($id, $newData);
+
+            return response()->json($incident, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => $e->getMessage()], 404); // Retorna 404 se o incidente não for encontrado
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->validator->errors()], 422); // Retorna os erros de validação
+        }
     }
 
     public function destroy($id)
@@ -75,5 +98,18 @@ class IncidentController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()]);
         }
+    }
+
+    protected function  updateObject($a, $b): object
+    {
+        // Iterar sobre todas as propriedades de B
+        foreach ($b as $key => $value) {
+            // Se o campo não existir no objeto A ou o valor for diferente
+            if (!property_exists($a, $key) || $a->$key !== $value) {
+                $a->$key = $value; // Sobrescreve A com B ou adiciona campo novo
+            }
+        }
+
+        return $a; // Retorna o objeto A atualizado
     }
 }
