@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\User\Actions\LoginUserAction;
 use App\Domains\User\Actions\RegisterUserAction;
-use App\Domains\User\Repositories\UserRepositoryInterface;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    protected $userRepository;
     protected $registerUserAction;
+    protected $loginUserAction;
 
-    public function __construct(UserRepositoryInterface $userRepository, RegisterUserAction $registerUserAction)
+    public function __construct(RegisterUserAction $registerUserAction, LoginUserAction $loginUserAction)
     {
-        $this->userRepository = $userRepository;
         $this->registerUserAction = $registerUserAction;
+        $this->loginUserAction = $loginUserAction;
     }
 
     public function register(Request $request)
@@ -30,5 +29,31 @@ class AuthController extends Controller
         } catch (\InvalidArgumentException $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+
+    public function login(Request $request)
+    {
+        $data = $request->all();
+
+        try {
+            $token = $this->loginUserAction->execute($data);
+
+            if ($token) {
+                return $this->respondWithToken($token);
+            }
+
+            return response()->json($token, 201);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+        ]);
     }
 }

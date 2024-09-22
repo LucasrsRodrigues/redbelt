@@ -3,11 +3,18 @@
 namespace App\Domains\User\Actions;
 
 use App\Domains\User\Models\User;
+use App\Domains\User\Repositories\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterUserAction
 {
+    protected $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository,)
+    {
+        $this->userRepository = $userRepository;
+    }
     /**
      * Executa a ação de registro do usuário.
      *
@@ -26,10 +33,10 @@ class RegisterUserAction
             throw new \InvalidArgumentException('Invalid data provided.');
         }
 
-        $user = User::create([
+        $user = $this->userRepository->create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']), // Criptografa a senha
+            'password' => Hash::make($data['password']),
         ]);
 
         return $user;
